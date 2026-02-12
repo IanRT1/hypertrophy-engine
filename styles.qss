@@ -1,0 +1,221 @@
+/* ---------------------------------------------------
+   GLOBAL
+--------------------------------------------------- */
+
+QWidget {
+    background: #0e0f12;
+    color: #e8e8ea;
+    font-size: 10pt;
+    font-family: Segoe UI;
+}
+
+/* ---------------------------------------------------
+   GROUP BOXES
+--------------------------------------------------- */
+
+QGroupBox {
+    border: 1px solid #23252b;
+    border-radius: 14px;
+    margin-top: 12px;
+    padding: 14px;
+    background: #111319;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 10px;
+    color: #9fa6ff;
+    font-weight: 700;
+    font-size: 11pt;
+}
+
+/* ---------------------------------------------------
+   HEADINGS
+--------------------------------------------------- */
+
+QLabel#h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+QLabel#h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e8e8ea;
+}
+
+QLabel#muted {
+    color: #8b90a3;
+}
+
+/* Character specific */
+QLabel#CharacterStrength {
+    font-size: 12pt;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+QLabel#CharacterMeta {
+    font-size: 9pt;
+    color: #7d8293;
+}
+
+QLabel#MetricLabel {
+    font-size: 9pt;
+    color: #9aa0b5;
+    font-weight: 600;
+}
+
+/* ---------------------------------------------------
+   INPUTS
+--------------------------------------------------- */
+
+QLineEdit, QComboBox, QTextEdit {
+    background: #0b0c10;
+    border: 1px solid #262a34;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+QSpinBox {
+    background: #0b0c10;
+    border: 1px solid #262a34;
+    border-radius: 12px;
+    padding: 4px;
+    padding-right: 28px;
+}
+
+QSpinBox::up-button,
+QSpinBox::down-button {
+    width: 20px;
+    border-left: 1px solid #262a34;
+    background: #14161c;
+}
+
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover {
+    background: #202431;
+}
+
+QTextEdit {
+    min-height: 220px;
+}
+
+/* ---------------------------------------------------
+   BUTTONS
+--------------------------------------------------- */
+
+QPushButton {
+    background: #1a1d25;
+    border: 1px solid #2b2f3a;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-weight: 700;
+}
+
+QPushButton:hover {
+    background: #202431;
+}
+
+QPushButton:pressed {
+    background: #151925;
+}
+
+QPushButton:disabled {
+    background: #14161c;
+    color: #6c6f7a;
+    border: 1px solid #1f222b;
+}
+
+QPushButton#primary {
+    background: #2a5cff;
+    border: 1px solid #2a5cff;
+}
+
+QPushButton#primary:hover {
+    background: #3b6cff;
+}
+
+/* ---------------------------------------------------
+   PROGRESS BARS
+--------------------------------------------------- */
+
+QProgressBar {
+    border: 1px solid #262a34;
+    border-radius: 10px;
+    text-align: center;
+    height: 18px;
+    background: #0b0c10;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+QProgressBar::chunk {
+    border-radius: 10px;
+    background: qlineargradient(
+        x1:0, y1:0,
+        x2:1, y2:0,
+        stop:0 #2a5cff,
+        stop:1 #4f7dff
+    );
+}
+
+/* Slight glow effect when value high (optional future use) */
+QProgressBar:chunk:horizontal {
+    margin: 0px;
+}
+
+/* ---------------------------------------------------
+   SCROLLBARS (polish)
+--------------------------------------------------- */
+
+QScrollBar:vertical {
+    background: #0b0c10;
+    width: 8px;
+    margin: 4px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: #2a5cff;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #3b6cff;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+
+/* ---------------------------------------------------
+   DANGER BUTTON (Reset)
+--------------------------------------------------- */
+
+QPushButton#danger {
+    background: #3a1f24;
+    border: 1px solid #5c2a32;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-weight: 700;
+    color: #ffb4b4;
+}
+
+QPushButton#danger:hover {
+    background: #4a232b;
+}
+
+QPushButton#danger:pressed {
+    background: #2d1418;
+}
+
+QPushButton#danger:disabled {
+    background: #1c0e11;
+    color: #6c6f7a;
+    border: 1px solid #2a161b;
+}
