@@ -19,6 +19,7 @@ dev = [
     "build>=1,<2",
     "pytest>=8,<9",
     "ruff>=0.9,<1",
+    "tomli>=2,<3; python_version < '3.11'",
 ]
 
 [tool.setuptools]
