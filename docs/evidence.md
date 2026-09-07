@@ -6,6 +6,7 @@ supports only the stated relationship, not every coefficient in its implementati
 | Behavior | Evidence | Status | Implementation decision |
 |---|---|---|---|
 | Baseline 1RM from an all-out set | STRENGTH-001, STRENGTH-002 | Direct/inferred | Brzycki equation, restricted to 1-10 reps; UI recommends 4-10. Exercise-specific error remains. |
+| First-run exercise 1RM | None | Unvalidated | Explicit exercise/bodyweight ratios provide usable defaults. They are labeled fallbacks and must not be presented as population norms. |
 | Reps decline as relative load rises | REPS-001, REPS-002 | Direct | Broad calibration bands at 50-95% 1RM. |
 | Lower-body lifts may permit more reps | REPS-001 | Inferred | Lower-body modifiers; exact values remain unvalidated. |
 | Longer inter-set rest preserves volume | REST-001, REST-002 | Direct/inferred | Monotonic recovery function; exact decay coefficient remains unvalidated. |

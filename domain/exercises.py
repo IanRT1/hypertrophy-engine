@@ -169,3 +169,25 @@ EXERCISE_CATALOG: dict[str, ExerciseProfile] = {
         },
     ),
 }
+
+# Usability-oriented 1RM fallbacks for a 90 kg beginner, expressed per kg bodyweight.
+# Machine stacks and leverages are not standardized, so these are explicitly unvalidated
+# defaults until the user supplies an exercise-specific performance baseline.
+BEGINNER_FALLBACK_1RM_RATIOS = {
+    "Chest Press": 0.45,
+    "Lat Pulldown": 0.50,
+    "Machine Row": 0.50,
+    "Cable Lateral Raises": 0.15,
+    "Cable Tricep Pulldowns": 0.25,
+    "Bicep Bar Curl": 0.18,
+    "Leg Press": 1.20,
+    "Leg Extension": 0.55,
+    "Leg Curl": 0.45,
+    "Calf Raise": 0.70,
+}
+
+FALLBACK_LEVEL_MULTIPLIERS = {
+    "Beginner": 1.0,
+    "Intermediate": 1.35,
+    "Advanced": 1.70,
+}

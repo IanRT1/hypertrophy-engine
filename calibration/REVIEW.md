@@ -12,10 +12,10 @@ separate and asymptotic, but outputs remain simulations rather than individual f
    above `1.0`; fractional exponentiation then produced a complex number and crashed the next
    training day. Progress is now clamped to `[0, 1]`, with a regression test covering the
    ceiling and a deterministic 52-week test covering the original failure path.
-2. **Mitigated — fallback strength is undercalibrated.** For a 90 kg athlete, advanced Chest
-   Press falls back to 32.58 kg (`0.362x` bodyweight). Users can now replace that guess per
-   exercise with a recent 1–10RM set. Machine loads differ, so calibration is intentionally
-   exercise-specific; uncalibrated values are visibly labeled as fallbacks.
+2. **Mitigated — fallback strength uses explicit exercise defaults.** The old weighted-muscle
+   calculation made a 90 kg beginner unable to curl 10 kg. Exercise-specific bodyweight ratios
+   now provide usable first-run estimates, while user-entered 1–10RM sets remain the preferred
+   calibration. Machine loads differ, so uncalibrated values are visibly labeled as fallbacks.
 3. **Mitigated — progression previously reached the ceiling too quickly.** The intermediate
    scenario now moves from progress `0.35` to about `0.455` after one year and `0.543` after
    two years, rather than reaching `1.0` in year one. Neural/skill adaptation has a separate

@@ -1,8 +1,9 @@
 
 import pytest
 
-from domain import EXERCISE_CATALOG, Engine
+from domain import EXERCISE_CATALOG, Engine, SetPlan
 from domain.athlete_profile import AthleteProfile
+from domain.exercises import BEGINNER_FALLBACK_1RM_RATIOS, FALLBACK_LEVEL_MULTIPLIERS
 from domain.state import MuscleState
 
 EXPECTED_RATIOS = {
@@ -62,14 +63,23 @@ def test_seeded_noise_sequence_is_reproducible():
     assert [first._noise() for _ in range(5)] == [second._noise() for _ in range(5)]
 
 
+@pytest.mark.parametrize("level", FALLBACK_LEVEL_MULTIPLIERS)
 @pytest.mark.parametrize("exercise", EXERCISE_CATALOG)
-def test_current_1rm_is_weighted_strength_sum(beginner_engine, exercise):
-    profile = EXERCISE_CATALOG[exercise]
-    expected = sum(
-        beginner_engine.muscles[name].strength * ratio
-        for name, ratio in profile.strength_contribution.items()
+def test_default_1rm_uses_explicit_exercise_fallback(level, exercise):
+    profile = AthleteProfile(bodyweight=90, training_level=level)
+    engine = Engine(profile, seed=1)
+    expected = (
+        profile.bodyweight
+        * BEGINNER_FALLBACK_1RM_RATIOS[exercise]
+        * FALLBACK_LEVEL_MULTIPLIERS[level]
     )
-    assert beginner_engine.current_1rm(exercise) == pytest.approx(expected)
+    assert engine.current_1rm(exercise) == pytest.approx(expected)
+
+
+def test_first_run_beginner_can_curl_ten_kilograms():
+    engine = Engine(AthleteProfile(), seed=1)
+    result = engine.simulate_exercise("Bicep Bar Curl", 10, [SetPlan(2)])
+    assert result.total_reps > 0
 
 
 def test_unknown_exercise_raises_key_error(beginner_engine):
@@ -86,6 +96,11 @@ def test_hypertrophy_contribution_matches_formula(beginner_engine):
         * ratio
         for m, ratio in EXERCISE_CATALOG[name].strength_contribution.items()
     )
+    raw_1rm = sum(
+        beginner_engine.muscles[m].strength * ratio
+        for m, ratio in EXERCISE_CATALOG[name].strength_contribution.items()
+    )
+    expected *= beginner_engine.current_1rm(name) / raw_1rm
     assert beginner_engine.hypertrophy_1rm_contribution(name) == pytest.approx(expected)
 
 

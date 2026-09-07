@@ -6,7 +6,11 @@ from numbers import Integral, Real
 
 from .athlete_profile import AthleteProfile
 from .config import EngineConfig
-from .exercises import EXERCISE_CATALOG
+from .exercises import (
+    BEGINNER_FALLBACK_1RM_RATIOS,
+    EXERCISE_CATALOG,
+    FALLBACK_LEVEL_MULTIPLIERS,
+)
 from .models import (
     DayResult,
     ExerciseResult,
@@ -44,7 +48,10 @@ class Engine:
         self.rng = random.Random(seed)
 
         self.muscles: dict[str, MuscleState] = self._initialize_muscles()
-        self._baseline_scales = self._initialize_baseline_scales()
+        self._exercise_scales = self._initialize_exercise_scales()
+        self._calibrated_exercises = {
+            baseline.exercise for baseline in self.profile.performance_baselines
+        }
 
         self.day_index: int = 0
         self.daily_readiness: float = 1.0
@@ -147,7 +154,7 @@ class Engine:
         of all muscles involved in the lift.
         """
         self._exercise_profile(exercise_name)
-        return self._modeled_1rm(exercise_name) * self._baseline_scales.get(exercise_name, 1.0)
+        return self._modeled_1rm(exercise_name) * self._exercise_scales[exercise_name]
 
     def _modeled_1rm(self, exercise_name: str) -> float:
         profile = self._exercise_profile(exercise_name)
@@ -159,16 +166,27 @@ class Engine:
 
         return total
 
-    def _initialize_baseline_scales(self) -> dict[str, float]:
+    def _initialize_exercise_scales(self) -> dict[str, float]:
+        baselines = {
+            baseline.exercise: baseline for baseline in self.profile.performance_baselines
+        }
+        level_multiplier = FALLBACK_LEVEL_MULTIPLIERS[self.profile.training_level]
         scales = {}
-        for baseline in self.profile.performance_baselines:
-            inferred = self._modeled_1rm(baseline.exercise)
-            scales[baseline.exercise] = baseline.estimated_1rm / inferred
+        for exercise in EXERCISE_CATALOG:
+            baseline = baselines.get(exercise)
+            target_1rm = (
+                baseline.estimated_1rm
+                if baseline is not None
+                else self.profile.bodyweight
+                * BEGINNER_FALLBACK_1RM_RATIOS[exercise]
+                * level_multiplier
+            )
+            scales[exercise] = target_1rm / self._modeled_1rm(exercise)
         return scales
 
     def has_calibrated_1rm(self, exercise_name: str) -> bool:
         self._exercise_profile(exercise_name)
-        return exercise_name in self._baseline_scales
+        return exercise_name in self._calibrated_exercises
 
     def exercise_1rm_ceiling(self, exercise_name: str) -> float:
         profile = self._exercise_profile(exercise_name)
@@ -176,7 +194,7 @@ class Engine:
         modeled_ceiling = sum(
             muscle_ceiling * ratio for ratio in profile.strength_contribution.values()
         )
-        return modeled_ceiling * self._baseline_scales.get(exercise_name, 1.0)
+        return modeled_ceiling * self._exercise_scales[exercise_name]
 
     def neural_1rm_contribution(self, exercise_name: str) -> float:
         profile = self._exercise_profile(exercise_name)
@@ -184,7 +202,7 @@ class Engine:
             self.muscles[muscle_name].neural_adaptation * ratio
             for muscle_name, ratio in profile.strength_contribution.items()
         )
-        return total * self._baseline_scales.get(exercise_name, 1.0)
+        return total * self._exercise_scales[exercise_name]
 
     def muscular_1rm_contribution(self, exercise_name: str) -> float:
         return self.current_1rm(exercise_name) - self.neural_1rm_contribution(exercise_name)
@@ -206,7 +224,7 @@ class Engine:
 
             total += hypertrophy_component * ratio
 
-        return total * self._baseline_scales.get(exercise_name, 1.0)
+        return total * self._exercise_scales[exercise_name]
 
 
 
