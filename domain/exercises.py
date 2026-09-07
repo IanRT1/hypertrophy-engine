@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict
+
 
 # ===============================================================
 # Exercise Profile
@@ -18,14 +18,14 @@ class ExerciseProfile:
         Recommended: sum ~1.0.
     """
     name: str
-    muscle_distribution: Dict[str, float]
-    strength_contribution: Dict[str, float]
+    muscle_distribution: dict[str, float]
+    strength_contribution: dict[str, float]
 
 
 # ===============================================================
 # Exercise Catalog
 # ===============================================================
-EXERCISE_CATALOG: Dict[str, ExerciseProfile] = {
+EXERCISE_CATALOG: dict[str, ExerciseProfile] = {
 
     # -------------------------------
     # Upper Body Exercises

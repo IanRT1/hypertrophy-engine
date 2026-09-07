@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import List
-
 
 # =============================================================================
 # DOMAIN MODELS
@@ -34,7 +32,7 @@ class ExerciseResult:
     """Aggregated result of a full exercise."""
     name: str
     load: float
-    sets: List[SetResult]
+    sets: list[SetResult]
     total_reps: int
     total_stimulus: float
     total_fatigue_local: float

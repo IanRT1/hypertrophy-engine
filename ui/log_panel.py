@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGroupBox, QVBoxLayout, QTextEdit
+from PySide6.QtWidgets import QGroupBox, QTextEdit, QVBoxLayout
 
 
 class LogPanel(QGroupBox):

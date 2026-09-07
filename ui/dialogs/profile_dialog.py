@@ -1,11 +1,11 @@
 from PySide6.QtWidgets import (
+    QComboBox,
     QDialog,
-    QVBoxLayout,
+    QDoubleSpinBox,
     QHBoxLayout,
     QLabel,
-    QDoubleSpinBox,
-    QComboBox,
     QPushButton,
+    QVBoxLayout,
 )
 
 

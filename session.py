@@ -1,12 +1,11 @@
-from typing import List, Optional, Dict, Callable
-from datetime import datetime, timedelta, date
-from dataclasses import dataclass
 import math
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta
 from numbers import Real
 
-from domain import Engine, SetPlan, ExerciseResult, DayResult, EXERCISE_CATALOG
+from domain import EXERCISE_CATALOG, DayResult, Engine, ExerciseResult, SetPlan
 from domain.athlete_profile import AthleteProfile
-
 
 # =========================================================
 # ROUTINE DATA CONTAINER
@@ -16,8 +15,8 @@ from domain.athlete_profile import AthleteProfile
 class RoutineExercise:
     name: str
     load: float
-    set_plans: List[SetPlan]
-    rest_seconds: Optional[float] = None
+    set_plans: list[SetPlan]
+    rest_seconds: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, str) or not self.name:
@@ -56,13 +55,13 @@ class TrainingSession:
         self.engine = Engine(profile=self.profile, debug=debug)
 
         self.did_any_exercise_today = False
-        self.day_exercise_log: List[str] = []
+        self.day_exercise_log: list[str] = []
 
         # Simulation time
         self.start_date = datetime.now().date()
 
         # Calendar tracking
-        self.day_history: Dict[date, str] = {}
+        self.day_history: dict[date, str] = {}
 
     # ---------------------------------------------------------
     # Simulation Date
@@ -79,8 +78,8 @@ class TrainingSession:
         self,
         name: str,
         load: float,
-        set_plans: List[SetPlan],
-        rest_seconds: Optional[float] = None,
+        set_plans: list[SetPlan],
+        rest_seconds: float | None = None,
         log_output: bool = True,
     ) -> ExerciseResult:
 
@@ -120,10 +119,10 @@ class TrainingSession:
 
     def simulate_routine(
         self,
-        routine: Dict[int, List[RoutineExercise]],
+        routine: dict[int, list[RoutineExercise]],
         weeks: int,
-        training_days: List[int],
-        progress_callback: Optional[Callable[[int, int], None]] = None,
+        training_days: list[int],
+        progress_callback: Callable[[int, int], None] | None = None,
         silent: bool = True,
     ) -> None:
         """
@@ -169,7 +168,6 @@ class TrainingSession:
         for day_counter in range(total_days):
 
             weekday = self.engine.day_index % 7
-            today = self.current_sim_date()
 
             if weekday in training_days:
 
@@ -195,7 +193,7 @@ class TrainingSession:
     # Day Transition
     # ---------------------------------------------------------
 
-    def end_or_rest_day(self) -> Optional[DayResult]:
+    def end_or_rest_day(self) -> DayResult | None:
 
         today = self.current_sim_date()
 
@@ -216,7 +214,7 @@ class TrainingSession:
     # Calendar Support
     # ---------------------------------------------------------
 
-    def get_day_type(self, query_date: date) -> Optional[str]:
+    def get_day_type(self, query_date: date) -> str | None:
         return self.day_history.get(query_date)
 
     # ---------------------------------------------------------

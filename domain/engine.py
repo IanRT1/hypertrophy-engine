@@ -1,19 +1,20 @@
 from __future__ import annotations
-import random
-import math
-from numbers import Integral, Real
-from typing import List, Optional, Dict
 
+import math
+import random
+from numbers import Integral, Real
+
+from .athlete_profile import AthleteProfile
+from .config import EngineConfig
+from .exercises import EXERCISE_CATALOG
 from .models import (
+    DayResult,
+    ExerciseResult,
     SetPlan,
     SetResult,
-    ExerciseResult,
-    DayResult,
 )
-from .config import EngineConfig
 from .state import MuscleState
-from .exercises import EXERCISE_CATALOG
-from .athlete_profile import AthleteProfile
+
 
 class Engine:
     """
@@ -33,16 +34,16 @@ class Engine:
     def __init__(
         self,
         profile: AthleteProfile,
-        config: Optional[EngineConfig] = None,
+        config: EngineConfig | None = None,
         debug: bool = False,
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ):
         self.profile = profile
         self.cfg = config or EngineConfig()
         self.debug = bool(debug)
         self.rng = random.Random(seed)
 
-        self.muscles: Dict[str, MuscleState] = self._initialize_muscles()
+        self.muscles: dict[str, MuscleState] = self._initialize_muscles()
 
         self.day_index: int = 0
         self.daily_readiness: float = 1.0
@@ -99,7 +100,7 @@ class Engine:
     # Performance Model
     # -------------------------------------------------------------------------
 
-    def _initialize_muscles(self) -> Dict[str, MuscleState]:
+    def _initialize_muscles(self) -> dict[str, MuscleState]:
 
         bw = self.profile.bodyweight
         level = self.profile.training_level
@@ -359,8 +360,8 @@ class Engine:
         self,
         name: str,
         load: float,
-        set_plans: List[SetPlan],
-        rest_seconds: Optional[float] = None,
+        set_plans: list[SetPlan],
+        rest_seconds: float | None = None,
     ) -> ExerciseResult:
 
         self.update_daily_readiness()
@@ -372,7 +373,7 @@ class Engine:
         if not all(isinstance(plan, SetPlan) for plan in set_plans):
             raise TypeError("set_plans must contain only SetPlan instances")
 
-        results: List[SetResult] = []
+        results: list[SetResult] = []
 
         total_reps = 0
         total_stim = 0.0
@@ -460,13 +461,8 @@ class Engine:
             self._debug(
                 "FAT_SPLIT",
                 (
-                    "fat_local={:.4f} chronic_local={:.4f} "
-                    "transient_added={:.4f} sys_frac={:.3f}"
-                ).format(
-                    fat_local,
-                    chronic_local,
-                    transient_added,
-                    sys_frac,
+                    f"fat_local={fat_local:.4f} chronic_local={chronic_local:.4f} "
+                    f"transient_added={transient_added:.4f} sys_frac={sys_frac:.3f}"
                 ),
             )
 
@@ -493,13 +489,8 @@ class Engine:
             self._debug(
                 "STATE_AFTER_SET",
                 (
-                    "i={} reps={} stim={:.4f} "
-                    "transient_now={:.4f}"
-                ).format(
-                    idx,
-                    reps,
-                    stim,
-                    exercise_transient_fatigue,
+                    f"i={idx} reps={reps} stim={stim:.4f} "
+                    f"transient_now={exercise_transient_fatigue:.4f}"
                 ),
             )
 
@@ -516,7 +507,7 @@ class Engine:
 
         self._debug(
             "POST_EX_STATE",
-            "END total_stim={:.4f}".format(total_stim),
+            f"END total_stim={total_stim:.4f}",
         )
 
         return ExerciseResult(

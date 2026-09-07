@@ -1,20 +1,26 @@
 import sys
-from PySide6.QtWidgets import QApplication
+
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QApplication
+
+from resources import resource_path
 from ui.main_window import HypertrophyMainWindow
 
 
-def load_stylesheet(path: str) -> str:
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+def load_stylesheet() -> str:
+    return resource_path("styles.qss").read_text(encoding="utf-8")
 
 
-if __name__ == "__main__":
+def main() -> int:
     app = QApplication(sys.argv)
     app.setFont(QFont("Segoe UI", 10))
-    app.setStyleSheet(load_stylesheet("styles.qss"))
+    app.setStyleSheet(load_stylesheet())
 
     win = HypertrophyMainWindow()
     win.show()
 
-    sys.exit(app.exec())
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

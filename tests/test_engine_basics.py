@@ -1,11 +1,9 @@
-import math
 
 import pytest
 
-from domain import Engine, EXERCISE_CATALOG
+from domain import EXERCISE_CATALOG, Engine
 from domain.athlete_profile import AthleteProfile
 from domain.state import MuscleState
-
 
 EXPECTED_RATIOS = {
     "Chest": 0.5,
@@ -43,7 +41,10 @@ def test_initial_engine_state(beginner_engine):
     assert set(beginner_engine.muscles) == set(EXPECTED_RATIOS)
 
 
-@pytest.mark.parametrize("value,low,high,expected", [(-1, 0, 10, 0), (4, 0, 10, 4), (20, 0, 10, 10)])
+@pytest.mark.parametrize(
+    "value,low,high,expected",
+    [(-1, 0, 10, 0), (4, 0, 10, 4), (20, 0, 10, 10)],
+)
 def test_clamp(value, low, high, expected):
     assert Engine._clamp(value, low, high) == expected
 
@@ -148,9 +149,9 @@ def test_fatigue_multiplier_is_positive(beginner_engine):
 
 
 def test_fatigue_multiplier_increases_near_failure(beginner_engine):
-    assert beginner_engine.fatigue_multiplier("Chest Press", 0, 10) > beginner_engine.fatigue_multiplier(
-        "Chest Press", 5, 10
-    )
+    near_failure = beginner_engine.fatigue_multiplier("Chest Press", 0, 10)
+    far_from_failure = beginner_engine.fatigue_multiplier("Chest Press", 5, 10)
+    assert near_failure > far_from_failure
 
 
 def test_nonpositive_load_performs_zero_reps(beginner_engine):

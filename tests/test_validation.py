@@ -4,8 +4,7 @@ import pytest
 
 from domain import SetPlan
 from domain.athlete_profile import AthleteProfile
-from session import RoutineExercise
-from session import TrainingSession
+from session import RoutineExercise, TrainingSession
 
 
 @pytest.fixture
@@ -127,7 +126,15 @@ def test_routine_rejects_non_exercise_schedule_entry(validated_session):
         ({"name": "Chest Press", "load": "10", "set_plans": [SetPlan(1)]}, TypeError),
         ({"name": "Chest Press", "load": 10, "set_plans": []}, ValueError),
         ({"name": "Chest Press", "load": 10, "set_plans": [1]}, TypeError),
-        ({"name": "Chest Press", "load": 10, "set_plans": [SetPlan(1)], "rest_seconds": -1}, ValueError),
+        (
+            {
+                "name": "Chest Press",
+                "load": 10,
+                "set_plans": [SetPlan(1)],
+                "rest_seconds": -1,
+            },
+            ValueError,
+        ),
     ],
 )
 def test_routine_exercise_validates_fields(kwargs, error):

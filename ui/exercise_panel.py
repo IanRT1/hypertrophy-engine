@@ -1,30 +1,29 @@
-from typing import Dict, List
+
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
     QGroupBox,
-    QVBoxLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QSpinBox,
-    QComboBox,
-    QPushButton,
-    QWidget,
-    QTextEdit,
-    QTabWidget,
-    QCheckBox,
     QListWidget,
     QListWidgetItem,
-    QApplication,
+    QPushButton,
+    QSpinBox,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon
-import os
 
-from domain import SetPlan, EXERCISE_CATALOG
+from domain import EXERCISE_CATALOG, SetPlan
+from resources import resource_path
 from session import RoutineExercise
 
-
-RIR_PRESETS: Dict[str, int] = {
+RIR_PRESETS: dict[str, int] = {
     "0 (Failure)": 0,
     "1–3": 2,
     "3–5": 4,
@@ -56,11 +55,9 @@ class RoutineListItemWidget(QWidget):
 
         layout.addStretch()
 
-        icon_path = os.path.join("assets", "icons", "trash.png")
-
         self.trash_btn = QPushButton()
         self.trash_btn.setObjectName("trash") 
-        self.trash_btn.setIcon(QIcon(icon_path))
+        self.trash_btn.setIcon(QIcon(str(resource_path("assets/icons/trash.png"))))
         self.trash_btn.setIconSize(QSize(16, 16))
         self.trash_btn.setFixedSize(24, 24)
         self.trash_btn.setCursor(Qt.PointingHandCursor)
@@ -162,7 +159,7 @@ class ExercisePanel(QGroupBox):
             if widget:
                 widget.deleteLater()
 
-        self.rir_dropdowns: List[QComboBox] = []
+        self.rir_dropdowns: list[QComboBox] = []
 
         for i in range(self.sp_sets.value()):
             row_layout = QHBoxLayout()
@@ -219,7 +216,7 @@ class ExercisePanel(QGroupBox):
     def _build_routine_tab(self):
         layout = QVBoxLayout(self.routine_tab)
 
-        self.weekday_checkboxes: List[QCheckBox] = []
+        self.weekday_checkboxes: list[QCheckBox] = []
         days_row = QHBoxLayout()
         for day in WEEKDAYS:
             cb = QCheckBox(day[:3])
@@ -286,7 +283,7 @@ class ExercisePanel(QGroupBox):
         self.btn_run_routine.clicked.connect(self._run_routine)
         layout.addWidget(self.btn_run_routine)
 
-        self.routine_definition: Dict[int, List[RoutineExercise]] = {}
+        self.routine_definition: dict[int, list[RoutineExercise]] = {}
 
     def _update_day_selector(self):
         self.routine_day_selector.clear()
@@ -301,7 +298,7 @@ class ExercisePanel(QGroupBox):
             if widget:
                 widget.deleteLater()
 
-        self.routine_rir_dropdowns: List[QComboBox] = []
+        self.routine_rir_dropdowns: list[QComboBox] = []
 
         for i in range(self.routine_sets.value()):
             row_layout = QHBoxLayout()

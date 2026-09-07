@@ -1,6 +1,6 @@
 import pytest
 
-from domain import Engine, EXERCISE_CATALOG, SetPlan
+from domain import EXERCISE_CATALOG, Engine, SetPlan
 from domain.athlete_profile import AthleteProfile
 
 
@@ -42,7 +42,8 @@ def test_result_totals_equal_set_sums(beginner_engine):
     result = beginner_engine.simulate_exercise("Chest Press", 10, plans(0, 1, 2, 3))
     assert result.total_reps == sum(item.reps for item in result.sets)
     assert result.total_stimulus == pytest.approx(sum(item.stimulus for item in result.sets))
-    assert result.total_fatigue_local == pytest.approx(sum(item.fatigue_local for item in result.sets))
+    expected_local_fatigue = sum(item.fatigue_local for item in result.sets)
+    assert result.total_fatigue_local == pytest.approx(expected_local_fatigue)
     assert result.total_fatigue_systemic == pytest.approx(
         sum(item.fatigue_systemic for item in result.sets)
     )

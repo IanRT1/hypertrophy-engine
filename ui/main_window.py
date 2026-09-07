@@ -1,18 +1,20 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QSplitter,
-    QSizePolicy,
-)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QSizePolicy,
+    QSplitter,
+    QVBoxLayout,
+    QWidget,
+)
 
+from resources import resource_path
 from session import TrainingSession
-from .character_panel import CharacterPanel
+
 from .calendar_panel import CalendarPanel
-from .exercise_panel import ExercisePanel
+from .character_panel import CharacterPanel
 from .day_panel import DayPanel
+from .exercise_panel import ExercisePanel
 from .log_panel import LogPanel
 
 
@@ -27,7 +29,7 @@ class HypertrophyMainWindow(QWidget):
         self.session = TrainingSession(debug=True)
 
         self.setWindowTitle("Hypertrophy Engine")
-        self.setWindowIcon(QIcon("assets/icons/hypetrophy-engine.ico"))
+        self.setWindowIcon(QIcon(str(resource_path("assets/icons/hypertrophy-engine.ico"))))
         self.resize(1700, 920)
 
         self._build_ui()

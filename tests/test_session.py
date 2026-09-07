@@ -93,7 +93,10 @@ def test_training_day_without_exercises_is_recorded_as_rest(training_session):
 def test_routine_progress_callback_reports_each_day(training_session):
     calls = []
     training_session.simulate_routine(
-        {}, weeks=1, training_days=[], progress_callback=lambda current, total: calls.append((current, total))
+        {},
+        weeks=1,
+        training_days=[],
+        progress_callback=lambda current, total: calls.append((current, total)),
     )
     assert calls == [(day, 7) for day in range(1, 8)]
 

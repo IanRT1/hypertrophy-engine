@@ -1,8 +1,7 @@
 # athlete_profile.py
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from numbers import Real
-
 
 # =============================================================================
 # ATHLETE PROFILE

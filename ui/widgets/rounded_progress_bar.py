@@ -1,6 +1,6 @@
+from PySide6.QtCore import QRectF, Qt
+from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPainter, QPen
 from PySide6.QtWidgets import QProgressBar
-from PySide6.QtGui import QPainter, QColor, QBrush, QPen, QLinearGradient
-from PySide6.QtCore import Qt, QRectF
 
 
 class RoundedProgressBar(QProgressBar):

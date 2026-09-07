@@ -1,16 +1,16 @@
-from datetime import date
 import calendar
+from datetime import date
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QGroupBox,
-    QVBoxLayout,
     QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
     QLabel,
     QPushButton,
+    QVBoxLayout,
     QWidget,
-    QHBoxLayout,
 )
-from PySide6.QtCore import Qt
 
 
 class CalendarPanel(QGroupBox):

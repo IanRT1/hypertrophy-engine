@@ -2,19 +2,19 @@
 # CharacterPanel (Athlete Overview)
 # ------------------------------
 
+
 from PySide6.QtWidgets import (
     QGroupBox,
-    QVBoxLayout,
     QLabel,
-    QSizePolicy,
-    QPushButton,
     QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
 )
-from typing import Optional, Dict
 
-from ui.widgets.rounded_progress_bar import RoundedProgressBar
-from ui.dialogs.profile_dialog import ProfileDialog
 from domain import EXERCISE_CATALOG
+from ui.dialogs.profile_dialog import ProfileDialog
+from ui.widgets.rounded_progress_bar import RoundedProgressBar
 
 
 class CharacterPanel(QGroupBox):
@@ -77,7 +77,7 @@ class CharacterPanel(QGroupBox):
 
         self._section_label("Muscle Development", self.root_layout)
 
-        self.muscle_bars: Dict[str, RoundedProgressBar] = {}
+        self.muscle_bars: dict[str, RoundedProgressBar] = {}
 
         for muscle_name in self.session.engine.muscles.keys():
 
@@ -169,7 +169,7 @@ class CharacterPanel(QGroupBox):
     # Refresh UI
     # ------------------------------------------------------------------
 
-    def refresh(self, exercise_name: Optional[str] = None):
+    def refresh(self, exercise_name: str | None = None):
 
         engine = self.session.engine
         profile = self.session.profile

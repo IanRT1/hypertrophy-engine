@@ -1,12 +1,12 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QGroupBox,
-    QVBoxLayout,
     QLabel,
-    QPushButton,
     QMessageBox,
+    QPushButton,
     QSizePolicy,
+    QVBoxLayout,
 )
-from PySide6.QtCore import Qt
 
 
 class DayPanel(QGroupBox):

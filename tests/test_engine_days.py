@@ -51,11 +51,18 @@ def test_day_result_strength_breakdown_sums_to_total(beginner_engine):
 
 
 def test_untrained_day_does_not_create_adaptation(beginner_engine):
-    old = {name: (muscle.progress, muscle.strength) for name, muscle in beginner_engine.muscles.items()}
+    old = {
+        name: (muscle.progress, muscle.strength)
+        for name, muscle in beginner_engine.muscles.items()
+    }
     result = beginner_engine.end_day()
     assert result.growth_progress == 0
     assert result.strength_gain == 0
-    assert old == {name: (muscle.progress, muscle.strength) for name, muscle in beginner_engine.muscles.items()}
+    current = {
+        name: (muscle.progress, muscle.strength)
+        for name, muscle in beginner_engine.muscles.items()
+    }
+    assert old == current
 
 
 def test_stimulated_muscle_resets_inactivity_counter(beginner_engine):
@@ -140,7 +147,8 @@ def test_rest_day_reduces_both_fatigue_types(beginner_engine, monkeypatch):
     chest = beginner_engine.muscles["Chest"]
     chest.fatigue_local = chest.fatigue_systemic = 2
     beginner_engine.rest_day()
-    assert chest.fatigue_local == pytest.approx(2 * math.exp(-beginner_engine.cfg.local_recovery_rate))
+    expected_local = 2 * math.exp(-beginner_engine.cfg.local_recovery_rate)
+    assert chest.fatigue_local == pytest.approx(expected_local)
     assert chest.fatigue_systemic == pytest.approx(
         2 * math.exp(-beginner_engine.cfg.systemic_recovery_rate)
     )
