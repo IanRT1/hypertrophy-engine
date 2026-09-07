@@ -18,6 +18,7 @@ hypertrophy-engine = "main:main"
 dev = [
     "build>=1,<2",
     "pytest>=8,<9",
+    "pytest-qt>=4.4,<5",
     "ruff>=0.9,<1",
     "tomli>=2,<3; python_version < '3.11'",
 ]

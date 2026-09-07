@@ -183,21 +183,19 @@ class ExercisePanel(QGroupBox):
     def _simulate_exercise(self):
         try:
             load = float(self.in_load.text().strip())
-        except ValueError:
-            self.main_window.log("Invalid load input.")
+            plans = [
+                SetPlan(rir=RIR_PRESETS[d.currentText()])
+                for d in self.rir_dropdowns
+            ]
+            self.session.simulate_exercise(
+                name=self.exercise_dropdown.currentText(),
+                load=load,
+                set_plans=plans,
+                rest_seconds=float(self.sp_rest_seconds.value()),
+            )
+        except (TypeError, ValueError) as exc:
+            self.main_window.log(f"Invalid exercise input: {exc}")
             return
-
-        plans = [
-            SetPlan(rir=RIR_PRESETS[d.currentText()])
-            for d in self.rir_dropdowns
-        ]
-
-        self.session.simulate_exercise(
-            name=self.exercise_dropdown.currentText(),
-            load=load,
-            set_plans=plans,
-            rest_seconds=float(self.sp_rest_seconds.value()),
-        )
 
         self.exercise_results.setPlainText(
             "\n\n".join(self.session.day_exercise_log)
@@ -318,26 +316,26 @@ class ExercisePanel(QGroupBox):
 
     def _add_routine_exercise(self):
         if self.routine_day_selector.count() == 0:
+            self.main_window.log("Select a training day before adding an exercise.")
             return
 
         try:
             load = float(self.routine_load.text().strip())
-        except ValueError:
+            plans = [
+                SetPlan(rir=RIR_PRESETS[d.currentText()])
+                for d in self.routine_rir_dropdowns
+            ]
+            rex = RoutineExercise(
+                name=self.routine_exercise_dropdown.currentText(),
+                load=load,
+                set_plans=plans,
+                rest_seconds=float(self.routine_rest.value()),
+            )
+        except (TypeError, ValueError) as exc:
+            self.main_window.log(f"Invalid routine input: {exc}")
             return
 
         day_index = self.routine_day_selector.currentData()
-
-        plans = [
-            SetPlan(rir=RIR_PRESETS[d.currentText()])
-            for d in self.routine_rir_dropdowns
-        ]
-
-        rex = RoutineExercise(
-            name=self.routine_exercise_dropdown.currentText(),
-            load=load,
-            set_plans=plans,
-            rest_seconds=float(self.routine_rest.value()),
-        )
 
         self.routine_definition.setdefault(day_index, []).append(rex)
 
