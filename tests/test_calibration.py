@@ -1,10 +1,12 @@
 from calibration.generate import (
+    detraining_rows,
     longitudinal_rows,
     recovery_rows,
     rep_curve_rows,
     repeated_set_rows,
     strength_rows,
 )
+from calibration.targets import LONGITUDINAL_PROGRESS_GAIN_BANDS
 
 
 def test_strength_report_covers_every_level_and_exercise():
@@ -58,3 +60,41 @@ def test_full_year_calibration_remains_finite_and_bounded():
     assert len(rows) == 52
     assert all(0 <= row["chest_progress"] <= 1 for row in rows)
     assert all(row["chest_strength"] > 0 for row in rows)
+
+
+def test_longitudinal_progress_matches_broad_horizon_targets():
+    rows = longitudinal_rows(weeks=104)
+    initial_progress = 0.35
+    for week, (low, high) in LONGITUDINAL_PROGRESS_GAIN_BANDS.items():
+        gain = rows[week - 1]["chest_progress"] - initial_progress
+        assert low <= gain <= high
+
+
+def test_two_year_progress_remains_below_lifetime_ceiling():
+    rows = longitudinal_rows(weeks=104)
+    assert rows[-1]["chest_progress"] < 0.70
+
+
+def test_neural_adaptation_slows_over_time():
+    rows = longitudinal_rows(weeks=52)
+    first_quarter_gain = rows[12]["chest_neural_adaptation"]
+    last_quarter_gain = (
+        rows[51]["chest_neural_adaptation"] - rows[38]["chest_neural_adaptation"]
+    )
+    assert first_quarter_gain > last_quarter_gain
+
+
+def test_more_weekly_training_produces_more_progress_with_diminishing_difference():
+    twice = longitudinal_rows(weeks=26, training_days=(0, 3))[-1]["chest_progress"]
+    three = longitudinal_rows(weeks=26, training_days=(0, 2, 4))[-1]["chest_progress"]
+    four = longitudinal_rows(weeks=26, training_days=(0, 1, 3, 5))[-1]["chest_progress"]
+    assert twice < three < four
+    assert four - three < three - twice
+
+
+def test_detraining_loses_some_gains_and_retraining_recovers_them():
+    baseline, trained, detrained, retrained = detraining_rows()
+    assert trained["chest_press_1rm"] > baseline["chest_press_1rm"]
+    assert baseline["chest_press_1rm"] < detrained["chest_press_1rm"] < trained["chest_press_1rm"]
+    assert retrained["chest_press_1rm"] >= trained["chest_press_1rm"]
+    assert detrained["chest_neural_adaptation"] < trained["chest_neural_adaptation"]

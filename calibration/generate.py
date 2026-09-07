@@ -120,11 +120,15 @@ def recovery_rows(exercise: str = "Chest Press") -> list[dict]:
     return rows
 
 
-def longitudinal_rows(weeks: int = 52, exercise: str = "Chest Press") -> list[dict]:
+def longitudinal_rows(
+    weeks: int = 52,
+    exercise: str = "Chest Press",
+    training_days: tuple[int, ...] = (0, 2, 4),
+) -> list[dict]:
     engine = deterministic_engine()
     rows = []
     for day in range(weeks * 7):
-        if day % 7 in (0, 2, 4):
+        if day % 7 in training_days:
             load = engine.current_1rm(exercise) * 0.75
             engine.simulate_exercise(exercise, load, [SetPlan(2) for _ in range(3)], 180)
             engine.end_day()
@@ -137,9 +141,41 @@ def longitudinal_rows(weeks: int = 52, exercise: str = "Chest Press") -> list[di
                     "week": engine.day_index // 7,
                     "chest_progress": round(chest.progress, 6),
                     "chest_strength": round(chest.strength, 4),
+                    "chest_neural_adaptation": round(chest.neural_adaptation, 4),
+                    "chest_press_1rm": round(engine.current_1rm(exercise), 4),
                     "chest_peak_progress": round(chest.peak_progress, 6),
                 }
             )
+    return rows
+
+
+def detraining_rows(exercise: str = "Chest Press") -> list[dict]:
+    engine = deterministic_engine()
+    rows = []
+
+    def snapshot(phase: str) -> None:
+        chest = engine.muscles["Chest"]
+        rows.append(
+            {
+                "phase": phase,
+                "week": engine.day_index // 7,
+                "chest_progress": round(chest.progress, 6),
+                "chest_neural_adaptation": round(chest.neural_adaptation, 4),
+                "chest_press_1rm": round(engine.current_1rm(exercise), 4),
+            }
+        )
+
+    snapshot("baseline")
+    for phase, weeks in (("training", 12), ("detraining", 12), ("retraining", 12)):
+        for day in range(weeks * 7):
+            should_train = phase != "detraining" and day % 7 in (0, 2, 4)
+            if should_train:
+                load = engine.current_1rm(exercise) * 0.75
+                engine.simulate_exercise(exercise, load, [SetPlan(2) for _ in range(3)], 180)
+                engine.end_day()
+            else:
+                engine.rest_day()
+        snapshot(phase)
     return rows
 
 
@@ -158,6 +194,7 @@ def write_review(path: Path, reports: dict[str, list[dict]]) -> None:
     bench = [row for row in strength if row["exercise"] == "Chest Press"]
     recovery = reports["recovery"]
     longitudinal = reports["longitudinal"]
+    detraining = reports["detraining"]
     rest_totals = {}
     for row in reports["repeated_sets"]:
         rest_totals[row["rest_seconds"]] = row["total_reps"]
@@ -182,6 +219,11 @@ def write_review(path: Path, reports: dict[str, list[dict]]) -> None:
         f"{longitudinal[-1]['chest_progress']} after week 52; strength: "
         f"{longitudinal[0]['chest_strength']} kg to "
         f"{longitudinal[-1]['chest_strength']} kg.</p>",
+        "<h2>Training, detraining, and retraining</h2>",
+        "<ul>" + "".join(
+            f"<li>{html.escape(row['phase'])}: {row['chest_press_1rm']} kg 1RM</li>"
+            for row in detraining
+        ) + "</ul>",
         "<p>See the CSV reports and calibration/SOURCES.md before changing coefficients.</p>",
     ]
     path.write_text("<!doctype html><meta charset='utf-8'>" + "".join(body), encoding="utf-8")
@@ -194,6 +236,7 @@ def generate(output_dir: Path) -> dict[str, list[dict]]:
         "repeated_sets": repeated_set_rows(),
         "recovery": recovery_rows(),
         "longitudinal": longitudinal_rows(),
+        "detraining": detraining_rows(),
     }
     for name, rows in reports.items():
         write_csv(output_dir / f"{name}.csv", rows)

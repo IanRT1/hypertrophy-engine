@@ -36,3 +36,9 @@ class MuscleState:
     # Inactivity Tracking
     # ---------------------------
     days_since_stimulus: int = 0
+
+    # Long-term calibration state (kept after legacy fields for positional compatibility)
+    baseline_strength: float = 40.0
+    peak_strength: float = 40.0
+    neural_adaptation: float = 0.0
+    baseline_progress: float = 0.0

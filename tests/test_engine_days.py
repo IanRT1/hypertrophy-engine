@@ -89,6 +89,10 @@ def test_no_atrophy_during_grace_period(beginner_engine):
 def test_atrophy_begins_after_grace_period(beginner_engine, monkeypatch):
     monkeypatch.setattr(beginner_engine, "_noise", lambda mean=1.0, variation=0.05: mean)
     chest = beginner_engine.muscles["Chest"]
+    chest.progress += 0.05
+    chest.peak_progress = chest.progress
+    chest.strength += 5
+    chest.peak_strength = chest.strength
     initial = (chest.progress, chest.strength)
     beginner_engine.rest_day(beginner_engine.cfg.atrophy_grace_period + 1)
     assert chest.progress < initial[0]
@@ -98,9 +102,76 @@ def test_atrophy_begins_after_grace_period(beginner_engine, monkeypatch):
 def test_atrophy_never_crosses_memory_floor(beginner_engine, monkeypatch):
     monkeypatch.setattr(beginner_engine, "_noise", lambda mean=1.0, variation=0.05: mean)
     chest = beginner_engine.muscles["Chest"]
-    floor = chest.peak_progress * beginner_engine.cfg.memory_retention_floor
+    floor = chest.baseline_progress + (
+        chest.peak_progress - chest.baseline_progress
+    ) * beginner_engine.cfg.memory_retention_floor
     beginner_engine.rest_day(500)
     assert chest.progress == pytest.approx(floor)
+
+
+def test_detraining_does_not_drop_contractile_strength_below_baseline(
+    beginner_engine, monkeypatch
+):
+    monkeypatch.setattr(beginner_engine, "_noise", lambda mean=1.0, variation=0.05: mean)
+    chest = beginner_engine.muscles["Chest"]
+    baseline = chest.baseline_strength
+    chest.strength += 5
+    chest.peak_strength = chest.strength
+    beginner_engine.rest_day(500)
+    assert chest.strength >= baseline
+
+
+def test_training_tracks_separate_hypertrophy_and_neural_adaptation(beginner_engine):
+    chest = beginner_engine.muscles["Chest"]
+    initial_strength = chest.strength
+    chest.day_stimulus = 0.2
+    result = beginner_engine.end_day()
+    assert chest.strength - initial_strength == pytest.approx(
+        result.hypertrophy_strength_gain
+    )
+    assert chest.neural_adaptation == pytest.approx(result.neural_strength_gain)
+
+
+def test_neural_gain_slows_near_capacity(beginner_engine):
+    chest = beginner_engine.muscles["Chest"]
+    chest.day_stimulus = 0.2
+    early_gain = beginner_engine.end_day().neural_strength_gain
+    capacity = chest.strength * beginner_engine.cfg.neural_adaptation_capacity_fraction
+    chest.neural_adaptation = capacity * 0.99
+    chest.day_stimulus = 0.2
+    late_gain = beginner_engine.end_day().neural_strength_gain
+    assert early_gain > late_gain
+
+
+def test_current_1rm_includes_neural_adaptation(beginner_engine):
+    before = beginner_engine.current_1rm("Chest Press")
+    beginner_engine.muscles["Chest"].neural_adaptation = 2
+    assert beginner_engine.current_1rm("Chest Press") > before
+
+
+def test_muscular_and_neural_components_sum_to_current_1rm(beginner_engine):
+    beginner_engine.muscles["Chest"].neural_adaptation = 2
+    name = "Chest Press"
+    assert (
+        beginner_engine.muscular_1rm_contribution(name)
+        + beginner_engine.neural_1rm_contribution(name)
+    ) == pytest.approx(beginner_engine.current_1rm(name))
+
+
+def test_less_trained_profiles_adapt_faster_to_equal_stimulus():
+    engines = [
+        Engine(AthleteProfile(training_level=level), seed=1)
+        for level in ("Beginner", "Intermediate", "Advanced")
+    ]
+    for engine in engines:
+        engine.muscles["Chest"].day_stimulus = 0.2
+    results = [engine.end_day() for engine in engines]
+    assert results[0].growth_progress > results[1].growth_progress > results[2].growth_progress
+    assert (
+        results[0].neural_strength_gain
+        > results[1].neural_strength_gain
+        > results[2].neural_strength_gain
+    )
 
 
 def test_memory_regain_is_faster_than_normal_growth(monkeypatch):
@@ -136,11 +207,12 @@ def test_progress_saturates_at_physiological_ceiling(beginner_engine):
     chest.peak_progress = 0.999
     chest.day_stimulus = 100
     beginner_engine.end_day()
-    assert 0.999 <= chest.progress <= 1.0
+    after_first = chest.progress
+    assert 0.999 <= after_first < 1.0
 
     chest.day_stimulus = 100
     beginner_engine.end_day()
-    assert chest.progress == 1.0
+    assert after_first < chest.progress < 1.0
 
 
 def test_rest_day_advances_requested_number_of_days(beginner_engine):

@@ -2,9 +2,9 @@
 
 ## Verdict
 
-The engine's short-term behavior is directionally credible. Exercise-specific baselines now
-make initial strength personal when supplied, but fallback strength and year-long progression
-are not realistic enough to treat as predictions. The reports remain regression diagnostics.
+The engine's short-term behavior is directionally credible. Exercise-specific baselines make
+initial strength personal when supplied. Long-term hypertrophy and neural adaptation are now
+separate and asymptotic, but outputs remain simulations rather than individual forecasts.
 
 ## Findings
 
@@ -16,10 +16,10 @@ are not realistic enough to treat as predictions. The reports remain regression 
    Press falls back to 32.58 kg (`0.362x` bodyweight). Users can now replace that guess per
    exercise with a recent 1–10RM set. Machine loads differ, so calibration is intentionally
    exercise-specific; uncalibrated values are visibly labeled as fallbacks.
-3. **High — progression reaches the model ceiling too quickly.** The intermediate Chest Press
-   scenario reaches progress `1.0` within 52 weeks on three weekly sessions. The meaning of
-   that ceiling and its time scale need to be explicitly defined before growth coefficients
-   are tuned.
+3. **Mitigated — progression previously reached the ceiling too quickly.** The intermediate
+   scenario now moves from progress `0.35` to about `0.455` after one year and `0.543` after
+   two years, rather than reaching `1.0` in year one. Neural/skill adaptation has a separate
+   finite reserve and slows over time.
 4. **Medium — lower-body repetition uplift needs refinement.** Every repetition curve falls
    within the deliberately broad target bands, but the lower-body advantage remains strong at
    90–95% 1RM. Published comparisons indicate that exercise differences narrow at heavier
@@ -31,6 +31,6 @@ are not realistic enough to treat as predictions. The reports remain regression 
 
 ## Recommended Next Change
 
-Define what `progress = 1` represents and calibrate multi-month adaptation against longitudinal
-resistance-training data. Do not tighten the broad repetition bands until exercise-specific
-datasets justify narrower limits.
+Add age and sex as calibration inputs and test multiple training volumes. The current
+longitudinal bands span heterogeneous populations, so they should not be narrowed until the
+profile can represent those important moderators.

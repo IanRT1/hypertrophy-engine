@@ -275,8 +275,8 @@ class CharacterPanel(QGroupBox):
         # ==========================================================
 
         current_1rm = engine.current_1rm(exercise_name)
-        hypertrophy_component = engine.hypertrophy_1rm_contribution(exercise_name)
-        neural_component = current_1rm - hypertrophy_component
+        muscular_component = engine.muscular_1rm_contribution(exercise_name)
+        neural_component = engine.neural_1rm_contribution(exercise_name)
 
         weighted_ceiling = engine.exercise_1rm_ceiling(exercise_name)
 
@@ -288,7 +288,7 @@ class CharacterPanel(QGroupBox):
         self.lbl_stats.setText(
             f"{exercise_name} Stats:\n"
             f"  • 1RM: {current_1rm:.1f} kg ({estimate_kind})\n"
-            f"  • Hypertrophy: {hypertrophy_component:.1f} kg\n"
+            f"  • Muscular component: {muscular_component:.1f} kg\n"
             f"  • Neural: {neural_component:.1f} kg\n"
             f"  • Ceiling: {weighted_ceiling:.0f} kg\n"
             f"  • Distance to Ceiling: {distance_to_ceiling:.1f} kg"

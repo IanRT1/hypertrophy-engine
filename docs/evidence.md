@@ -10,7 +10,9 @@ supports only the stated relationship, not every coefficient in its implementati
 | Lower-body lifts may permit more reps | REPS-001 | Inferred | Lower-body modifiers; exact values remain unvalidated. |
 | Longer inter-set rest preserves volume | REST-001, REST-002 | Direct/inferred | Monotonic recovery function; exact decay coefficient remains unvalidated. |
 | Fatigue can persist for 48-72 hours | RECOVERY-001, RECOVERY-002 | Direct/inferred | Calibration checks declining residual fatigue through 72 hours. |
-| Multi-month hypertrophy progression | None | Unvalidated | Current adaptation coefficients are simulation assumptions, not forecasts. |
+| Early neural/skill strength gain | NEURAL-001, LONGTERM-001 | Direct/inferred | Neural adaptation has a separate finite reserve and slows as that reserve fills. Exact capacity and learning rate are inferred. |
+| Multi-month hypertrophy progression | LONGTERM-001, LONGTERM-002, LONGTERM-003 | Inferred | Lifetime-ceiling distance produces diminishing returns; 3-, 6-, 12-, and 24-month bands are deliberately broad. |
+| Detraining and retraining | DETRAIN-001, DETRAIN-002 | Direct/inferred | Neural adaptation decays faster than retained muscular gains; a fraction of acquired progress forms the memory floor. Exact rates remain inferred. |
 
 ## Updating the model
 

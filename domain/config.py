@@ -58,9 +58,14 @@ class EngineConfig:
     # Adaptation pacing
     # -------------------------------------------------------------------------
 
-    adaptation_rate: float = 0.015
+    adaptation_rate: float = 0.0025
+    adaptation_distance_exponent: float = 1.0
     strength_gain_factor: float = 15.0
     adaptation_fatigue_brake_k: float = 0.35
+
+    # Early skill/neural gains approach a finite exercise-independent reserve.
+    neural_adaptation_capacity_fraction: float = 0.15
+    neural_learning_rate: float = 0.04
 
     # -------------------------------------------------------------------------
     # Recovery
@@ -109,8 +114,8 @@ class EngineConfig:
     # How aggressively lost size is regained
     memory_regain_multiplier: float = 4.0
 
-    # % of peak progress that is permanently retained
-    memory_retention_floor: float = 0.85
+    # Fraction of acquired progress retained after prolonged detraining.
+    memory_retention_floor: float = 0.15
 
     # =========================================================================
     # NEW: Neural decay during inactivity

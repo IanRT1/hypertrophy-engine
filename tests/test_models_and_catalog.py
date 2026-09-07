@@ -20,6 +20,10 @@ def test_engine_config_has_safe_positive_rates():
     assert cfg.systemic_recovery_rate > 0
     assert 0 < cfg.memory_retention_floor <= 1
     assert cfg.atrophy_grace_period >= 0
+    assert 0 < cfg.adaptation_rate < 0.01
+    assert cfg.adaptation_distance_exponent >= 1
+    assert 0 < cfg.neural_adaptation_capacity_fraction < 1
+    assert 0 < cfg.neural_learning_rate < 1
 
 
 def test_set_plan_is_immutable():
@@ -46,6 +50,11 @@ def test_muscle_state_defaults_are_zeroed_except_strength():
     assert state.progress == state.peak_progress == 0.0
     assert state.fatigue_local == state.fatigue_systemic == 0.0
     assert state.day_stimulus == state.day_fatigue_local == 0.0
+
+
+def test_muscle_state_preserves_legacy_positional_field_order():
+    state = MuscleState(50, 0.2, 0.3)
+    assert (state.strength, state.progress, state.peak_progress) == (50, 0.2, 0.3)
 
 
 @pytest.mark.parametrize("name,profile", EXERCISE_CATALOG.items())

@@ -22,3 +22,12 @@ LOWER_BODY_REP_BANDS = {
 REST_SECONDS = (30, 60, 120, 180, 300)
 LEVELS = ("Beginner", "Intermediate", "Advanced")
 REP_FRACTIONS = tuple(GENERAL_REP_BANDS)
+
+# Evidence: LONGTERM-001 through LONGTERM-004. Broad intermediate-trainee changes in the
+# normalized model-development variable; exact mapping remains inferred.
+LONGITUDINAL_PROGRESS_GAIN_BANDS = {
+    13: (0.015, 0.060),
+    26: (0.030, 0.100),
+    52: (0.060, 0.180),
+    104: (0.100, 0.300),
+}

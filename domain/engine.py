@@ -119,9 +119,13 @@ class Engine:
         }[level]
 
         def make(strength_ratio: float):
+            initial_strength = bw * strength_ratio * level_strength_factor
             return MuscleState(
-                strength=bw * strength_ratio * level_strength_factor,
+                strength=initial_strength,
+                baseline_strength=initial_strength,
+                peak_strength=initial_strength,
                 progress=level_progress_factor,
+                baseline_progress=level_progress_factor,
                 peak_progress=level_progress_factor,
             )
 
@@ -151,7 +155,7 @@ class Engine:
         total = 0.0
         for muscle_name, ratio in profile.strength_contribution.items():
             muscle = self.muscles[muscle_name]
-            total += muscle.strength * ratio
+            total += (muscle.strength + muscle.neural_adaptation) * ratio
 
         return total
 
@@ -173,6 +177,17 @@ class Engine:
             muscle_ceiling * ratio for ratio in profile.strength_contribution.values()
         )
         return modeled_ceiling * self._baseline_scales.get(exercise_name, 1.0)
+
+    def neural_1rm_contribution(self, exercise_name: str) -> float:
+        profile = self._exercise_profile(exercise_name)
+        total = sum(
+            self.muscles[muscle_name].neural_adaptation * ratio
+            for muscle_name, ratio in profile.strength_contribution.items()
+        )
+        return total * self._baseline_scales.get(exercise_name, 1.0)
+
+    def muscular_1rm_contribution(self, exercise_name: str) -> float:
+        return self.current_1rm(exercise_name) - self.neural_1rm_contribution(exercise_name)
 
     def hypertrophy_1rm_contribution(self, exercise_name: str) -> float:
         """
@@ -591,7 +606,11 @@ class Engine:
                 * muscle.fatigue_systemic
             )
 
-            distance = max(0.0, 1.0 - muscle.progress) ** 0.3
+            # progress=1 is the model's lifetime muscular-development ceiling, not a
+            # one-program goal. Evidence: LONGTERM-001; curve shape remains inferred.
+            distance = max(0.0, 1.0 - muscle.progress) ** (
+                self.cfg.adaptation_distance_exponent
+            )
 
             base_growth = (
                 self.cfg.adaptation_rate
@@ -630,18 +649,28 @@ class Engine:
             # NEURAL ADAPTATION
             # -------------------------
 
-            neural_rate = 0.03
-            neural_decay = 1.0 / (1.0 + 0.015 * muscle.strength)
-
+            level_multiplier = {
+                "Beginner": 1.0,
+                "Intermediate": 0.5,
+                "Advanced": 0.25,
+            }[self.profile.training_level]
+            neural_capacity = (
+                muscle.strength * self.cfg.neural_adaptation_capacity_fraction
+            )
+            neural_remaining = max(0.0, neural_capacity - muscle.neural_adaptation)
+            # Evidence: NEURAL-001. Finite reserve and learning rate are inferred.
             neural_gain = (
-                neural_rate
+                self.cfg.neural_learning_rate
+                * level_multiplier
                 * effective
-                * neural_decay
                 * fatigue_brake
+                * neural_remaining
             )
 
             total_strength = hypertrophy_strength_gain + neural_gain
-            muscle.strength += total_strength
+            muscle.strength += hypertrophy_strength_gain
+            muscle.neural_adaptation += neural_gain
+            muscle.peak_strength = max(muscle.peak_strength, muscle.strength)
 
             # -------------------------
             # INACTIVITY TRACKING
@@ -668,20 +697,27 @@ class Engine:
                     * math.log1p(inactivity)
                 )
 
-                retained_floor = (
-                    muscle.peak_progress
-                    * self.cfg.memory_retention_floor
-                )
+                retained_floor = muscle.baseline_progress + (
+                    muscle.peak_progress - muscle.baseline_progress
+                ) * self.cfg.memory_retention_floor
+
+                retained_strength = muscle.baseline_strength + (
+                    muscle.peak_strength - muscle.baseline_strength
+                ) * self.cfg.memory_retention_floor
 
                 new_progress = muscle.progress * (1.0 - atrophy_pressure)
                 muscle.progress = max(retained_floor, new_progress)
 
-                neural_decay_amount = (
-                    atrophy_pressure
-                    * self.cfg.neural_decay_multiplier
-                )
+                neural_decay_amount = atrophy_pressure * self.cfg.neural_decay_multiplier
 
-                muscle.strength *= (1.0 - neural_decay_amount)
+                muscle.strength = max(
+                    retained_strength,
+                    muscle.strength * (1.0 - atrophy_pressure),
+                )
+                muscle.neural_adaptation *= max(
+                    0.0,
+                    1.0 - neural_decay_amount,
+                )
 
             self._debug(
                 "DAY_OUTPUT",

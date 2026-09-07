@@ -18,6 +18,20 @@
   https://pubmed.ncbi.nlm.nih.gov/28965198/
 - **RECOVERY-002:** Thomas et al. (2018), neuromuscular fatigue after maximal efforts:
   https://pubmed.ncbi.nlm.nih.gov/30067591/
+- **NEURAL-001:** Staron et al. (1994), early strength changes during eight weeks of
+  progressive resistance training: https://pubmed.ncbi.nlm.nih.gov/8005869/
+- **LONGTERM-001:** Morse et al. (2005), 12 months of training increased plantar-flexor
+  strength by 20% and muscle volume by 12% in older men:
+  https://pubmed.ncbi.nlm.nih.gov/16003538/
+- **LONGTERM-002:** Seynnes et al. (2011), weekly observations across eight weeks found
+  measurable hypertrophy around weeks 3-4 and substantial individual uncertainty:
+  https://pubmed.ncbi.nlm.nih.gov/21409401/
+- **LONGTERM-003:** Pyka et al. (2003), two years of resistance training and three years of
+  detraining/maintenance in older adults: https://pubmed.ncbi.nlm.nih.gov/12955872/
+- **DETRAIN-001:** Psilander et al. (2019), training, 20 weeks of detraining, and retraining
+  with size and strength measured separately: https://pubmed.ncbi.nlm.nih.gov/30991013/
+- **DETRAIN-002:** Blocquiaux et al. (2020), partial retention after detraining and faster
+  return to prior 1RM during retraining: https://pubmed.ncbi.nlm.nih.gov/32017951/
 
 ## Additional synthesis
 
