@@ -23,7 +23,7 @@ class DayPanel(QGroupBox):
         self.refresh()
 
     # ------------------------------------------------------------------
-    # UI Construction
+    # UI
     # ------------------------------------------------------------------
 
     def _build_ui(self):
@@ -31,17 +31,14 @@ class DayPanel(QGroupBox):
         layout.setContentsMargins(14, 20, 14, 14)
         layout.setSpacing(12)
 
-        # Status label
         self.lbl_status = QLabel()
         self.lbl_status.setObjectName("h2")
         self.lbl_status.setAlignment(Qt.AlignLeft)
 
-        # Primary day transition button
         self.btn_transition = QPushButton()
         self.btn_transition.setObjectName("primary")
         self.btn_transition.clicked.connect(self._handle_transition)
 
-        # Reset button (danger action)
         self.btn_reset = QPushButton("Reset Simulation")
         self.btn_reset.setObjectName("danger")
         self.btn_reset.clicked.connect(self._confirm_reset)
@@ -51,7 +48,7 @@ class DayPanel(QGroupBox):
         layout.addWidget(self.btn_reset)
 
     # ------------------------------------------------------------------
-    # Public Refresh
+    # Refresh
     # ------------------------------------------------------------------
 
     def refresh(self):
@@ -63,7 +60,7 @@ class DayPanel(QGroupBox):
             self.btn_transition.setText("REST DAY")
 
     # ------------------------------------------------------------------
-    # Day Transition
+    # Transition
     # ------------------------------------------------------------------
 
     def _handle_transition(self):
@@ -79,10 +76,10 @@ class DayPanel(QGroupBox):
         else:
             self.main_window.log("REST DAY — recovery applied (+1 day).")
 
-        self.main_window.refresh_all()
+        self.main_window.on_day_transition()
 
     # ------------------------------------------------------------------
-    # Reset Flow
+    # Reset
     # ------------------------------------------------------------------
 
     def _confirm_reset(self):
@@ -101,11 +98,4 @@ class DayPanel(QGroupBox):
         result = dialog.exec()
 
         if result == QMessageBox.Yes:
-            self._perform_reset()
-
-    def _perform_reset(self):
-        """
-        Delegates full reset responsibility to the MainWindow.
-        DayPanel does NOT manage UI cleanup directly.
-        """
-        self.main_window.perform_full_reset()
+            self.main_window.perform_full_reset()

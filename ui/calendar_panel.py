@@ -7,9 +7,9 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QLabel,
     QPushButton,
-    QGraphicsDropShadowEffect,
+    QWidget,
+    QHBoxLayout,
 )
-from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
 
 
@@ -21,39 +21,104 @@ class CalendarPanel(QGroupBox):
         self.session = session
 
         v = QVBoxLayout(self)
+        v.setSpacing(10)
+
+        # ----------------------------------------
+        # HEADER
+        # ----------------------------------------
 
         self.calendar_header = QLabel("")
-        self.calendar_header.setObjectName("h2")
+        self.calendar_header.setObjectName("CalendarHeader")
+        self.calendar_header.setAlignment(Qt.AlignCenter)
         v.addWidget(self.calendar_header)
 
+        # ----------------------------------------
+        # WEEKDAYS
+        # ----------------------------------------
+
         weekdays_layout = QGridLayout()
+        weekdays_layout.setSpacing(6)
+
         for col, day_name in enumerate(
             ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         ):
             lbl = QLabel(day_name)
             lbl.setAlignment(Qt.AlignCenter)
-            lbl.setObjectName("muted")
+            lbl.setObjectName("CalendarWeekday")
             weekdays_layout.addWidget(lbl, 0, col)
 
         v.addLayout(weekdays_layout)
 
+        # ----------------------------------------
+        # GRID
+        # ----------------------------------------
+
         self.calendar_grid = QGridLayout()
+        self.calendar_grid.setSpacing(6)
         self.calendar_buttons = []
 
         for row in range(6):
             for col in range(7):
                 btn = QPushButton("")
-                btn.setMinimumHeight(50)
-                btn.setEnabled(False)
+                btn.setMinimumHeight(46)
+                btn.setProperty("dayType", "empty")
+                btn.setProperty("currentDay", False)
+                btn.setCursor(Qt.PointingHandCursor)
+
                 self.calendar_buttons.append(btn)
                 self.calendar_grid.addWidget(btn, row, col)
 
         v.addLayout(self.calendar_grid)
 
+        # ----------------------------------------
+        # LEGEND
+        # ----------------------------------------
+
+        v.addWidget(self._build_legend())
+
         self.refresh()
 
     # ---------------------------------------------------------
-    # Public Refresh (called every day transition)
+    # Legend
+    # ---------------------------------------------------------
+
+    def _build_legend(self):
+
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setSpacing(16)
+        layout.setContentsMargins(0, 6, 0, 0)
+
+        layout.addWidget(self._legend_item("Workout", "workout"))
+        layout.addWidget(self._legend_item("Rest", "rest"))
+        layout.addWidget(self._legend_item("Normal", "normal"))
+        layout.addWidget(self._legend_item("Today", "today"))
+
+        layout.addStretch()
+
+        return container
+
+    def _legend_item(self, text, day_type):
+
+        wrapper = QWidget()
+        lay = QHBoxLayout(wrapper)
+        lay.setSpacing(6)
+        lay.setContentsMargins(0, 0, 0, 0)
+
+        box = QLabel()
+        box.setFixedSize(14, 14)
+        box.setProperty("legendType", day_type)
+
+        label = QLabel(text)
+        label.setObjectName("CalendarLegendText")
+
+        lay.addWidget(box)
+        lay.addWidget(label)
+
+        return wrapper
+
+    # ---------------------------------------------------------
+    # Public Refresh
     # ---------------------------------------------------------
 
     def refresh(self):
@@ -69,7 +134,7 @@ class CalendarPanel(QGroupBox):
         self._populate_calendar()
 
     # ---------------------------------------------------------
-    # Calendar Grid Rendering
+    # Calendar Rendering
     # ---------------------------------------------------------
 
     def _populate_calendar(self):
@@ -84,57 +149,48 @@ class CalendarPanel(QGroupBox):
 
         for week in month_days:
             for day in week:
-                btn = self.calendar_buttons[idx]
 
-                btn.setGraphicsEffect(None)
+                btn = self.calendar_buttons[idx]
 
                 if day == 0:
                     btn.setText("")
-                    btn.setStyleSheet("""
-                        QPushButton {
-                            background-color: #0e0f12;
-                            border: none;
-                        }
-                    """)
+                    btn.setProperty("dayType", "empty")
+                    btn.setProperty("currentDay", False)
+
                 else:
                     btn.setText(str(day))
-                    btn.setStyleSheet("""
-                        QPushButton {
-                            border: 1px solid #2b2f3a;
-                            background-color: #14161c;
-                            font-weight: 600;
-                        }
-                    """)
 
-                    # Highlight simulation current day
-                    if day == self.current_day:
+                    sim_date = date(
+                        self.current_year,
+                        self.current_month,
+                        day,
+                    )
 
-                        glow = QGraphicsDropShadowEffect()
-                        glow.setBlurRadius(25)
-                        glow.setColor(QColor("#2a5cff"))
-                        glow.setOffset(0)
+                    day_type = self.session.get_day_type(sim_date)
 
-                        btn.setGraphicsEffect(glow)
+                    if day_type == "workout":
+                        btn.setProperty("dayType", "workout")
+                    elif day_type == "rest":
+                        btn.setProperty("dayType", "rest")
+                    else:
+                        btn.setProperty("dayType", "normal")
 
-                        btn.setStyleSheet("""
-                            QPushButton {
-                                border: 2px solid #2a5cff;
-                                background-color: #1c2338;
-                                font-weight: 800;
-                            }
-                        """)
+                    is_current = (day == self.current_day)
+                    btn.setProperty("currentDay", is_current)
+
+                btn.style().unpolish(btn)
+                btn.style().polish(btn)
 
                 idx += 1
 
-        # Clear remaining unused buttons (in months < 6 rows)
+        # Clear remaining cells
         while idx < len(self.calendar_buttons):
             btn = self.calendar_buttons[idx]
             btn.setText("")
-            btn.setGraphicsEffect(None)
-            btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #0e0f12;
-                    border: none;
-                }
-            """)
+            btn.setProperty("dayType", "empty")
+            btn.setProperty("currentDay", False)
+
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+
             idx += 1

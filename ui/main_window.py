@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 
 from session import TrainingSession
 from .character_panel import CharacterPanel
@@ -20,9 +21,13 @@ class HypertrophyMainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
+        # ---------------------------------------------------------
+        # Core Simulation Session
+        # ---------------------------------------------------------
         self.session = TrainingSession(debug=True)
 
         self.setWindowTitle("Hypertrophy Engine")
+        self.setWindowIcon(QIcon("assets/icons/hypetrophy-engine.ico"))
         self.resize(1700, 920)
 
         self._build_ui()
@@ -42,7 +47,7 @@ class HypertrophyMainWindow(QWidget):
         splitter.setChildrenCollapsible(False)
 
         # ==========================================================
-        # LEFT COLUMN (Character)
+        # LEFT COLUMN — Athlete Overview
         # ==========================================================
 
         left_widget = QWidget()
@@ -50,11 +55,9 @@ class HypertrophyMainWindow(QWidget):
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(10)
 
-        self.character = CharacterPanel(self.session)
-        self.character.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Expanding,
-        )
+        # Pass main window reference for reset orchestration
+        self.character = CharacterPanel(self.session, parent_window=self)
+        self.character.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         left_layout.addWidget(self.character)
 
@@ -62,7 +65,7 @@ class HypertrophyMainWindow(QWidget):
         left_widget.setMaximumWidth(420)
 
         # ==========================================================
-        # CENTER COLUMN (Exercise – Dominant)
+        # CENTER COLUMN — Exercise Simulation
         # ==========================================================
 
         center_widget = QWidget()
@@ -71,15 +74,12 @@ class HypertrophyMainWindow(QWidget):
         center_layout.setSpacing(10)
 
         self.exercise = ExercisePanel(self.session, self)
-        self.exercise.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Expanding,
-        )
+        self.exercise.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         center_layout.addWidget(self.exercise)
 
         # ==========================================================
-        # RIGHT COLUMN (Day + Log + Calendar)
+        # RIGHT COLUMN — Day / Logs / Calendar
         # ==========================================================
 
         right_widget = QWidget()
@@ -91,7 +91,6 @@ class HypertrophyMainWindow(QWidget):
         self.log_panel = LogPanel()
         self.calendar = CalendarPanel(self.session)
 
-        # Important: allow natural expansion
         self.day.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.log_panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.calendar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -100,10 +99,9 @@ class HypertrophyMainWindow(QWidget):
         right_layout.addWidget(self.log_panel)
         right_layout.addWidget(self.calendar)
 
-        # Vertical proportions inside right column
-        right_layout.setStretch(0, 0)  # Day controls natural height
-        right_layout.setStretch(1, 2)  # Log moderate
-        right_layout.setStretch(2, 3)  # Calendar slightly bigger
+        right_layout.setStretch(0, 0)
+        right_layout.setStretch(1, 2)
+        right_layout.setStretch(2, 3)
 
         right_widget.setMinimumWidth(320)
         right_widget.setMaximumWidth(420)
@@ -116,11 +114,9 @@ class HypertrophyMainWindow(QWidget):
         splitter.addWidget(center_widget)
         splitter.addWidget(right_widget)
 
-        # Horizontal proportions (balanced)
         splitter.setStretchFactor(0, 2)
         splitter.setStretchFactor(1, 5)
         splitter.setStretchFactor(2, 3)
-
 
         root_layout.addWidget(splitter)
 
@@ -128,8 +124,11 @@ class HypertrophyMainWindow(QWidget):
     # Public Interface
     # ---------------------------------------------------------------------
 
-    def refresh_all(self):
-        self.character.refresh()
+    def refresh_all(self, selected_exercise: str = None):
+        """
+        Refresh all panels that reflect engine state.
+        """
+        self.character.refresh(exercise_name=selected_exercise)
         self.day.refresh()
         self.calendar.refresh()
 
@@ -137,14 +136,37 @@ class HypertrophyMainWindow(QWidget):
         self.log_panel.append(msg)
 
     # ---------------------------------------------------------------------
-    # FULL RESET ORCHESTRATION
+    # Day Transition Orchestration
+    # ---------------------------------------------------------------------
+
+    def on_day_transition(self):
+        """
+        Called after END DAY or REST DAY.
+        Clears ExercisePanel results and refreshes UI.
+        """
+        self.exercise.clear_results()
+        self.refresh_all()
+
+    # ---------------------------------------------------------------------
+    # Profile Reset Hook (NEW)
+    # ---------------------------------------------------------------------
+
+    def on_profile_updated(self):
+        """
+        Called when AthleteProfile changes.
+        Performs full reset and refresh.
+        """
+        self.perform_full_reset()
+
+    # ---------------------------------------------------------------------
+    # FULL RESET
     # ---------------------------------------------------------------------
 
     def perform_full_reset(self):
-
+        """
+        Hard reset of simulation state.
+        """
         self.session.reset_all()
-
-        self.log_panel.clear_log()
         self.exercise.reset_ui()
-
+        self.log_panel.clear_log()
         self.refresh_all()

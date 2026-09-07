@@ -138,34 +138,7 @@ QPushButton#primary:hover {
     background: #3b6cff;
 }
 
-/* ---------------------------------------------------
-   PROGRESS BARS
---------------------------------------------------- */
 
-QProgressBar {
-    border: 1px solid #262a34;
-    border-radius: 10px;
-    text-align: center;
-    height: 18px;
-    background: #0b0c10;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-QProgressBar::chunk {
-    border-radius: 10px;
-    background: qlineargradient(
-        x1:0, y1:0,
-        x2:1, y2:0,
-        stop:0 #2a5cff,
-        stop:1 #4f7dff
-    );
-}
-
-/* Slight glow effect when value high (optional future use) */
-QProgressBar:chunk:horizontal {
-    margin: 0px;
-}
 
 /* ---------------------------------------------------
    SCROLLBARS (polish)
@@ -218,4 +191,131 @@ QPushButton#danger:disabled {
     background: #1c0e11;
     color: #6c6f7a;
     border: 1px solid #2a161b;
+}
+
+/* ===============================
+   CALENDAR HEADER
+================================ */
+
+QLabel#CalendarHeader {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+/* Weekdays */
+
+QLabel#CalendarWeekday {
+    color: #8ea2ff;
+    font-weight: 700;
+    font-size: 9pt;
+}
+
+/* ===============================
+   LEGEND
+================================ */
+
+QLabel#CalendarLegendText {
+    color: #e8e8ea;
+    font-size: 9pt;
+}
+
+QLabel[legendType="workout"] {
+    background: #2a5cff;
+    border-radius: 4px;
+}
+
+QLabel[legendType="rest"] {
+    background: #5f6b85;
+    border-radius: 4px;
+}
+
+QLabel[legendType="normal"] {
+    background: #3a4155;
+    border-radius: 4px;
+}
+
+QLabel[legendType="today"] {
+    background: #00d4ff;
+    border-radius: 4px;
+}
+
+/* ===============================
+   DAY BUTTONS
+================================ */
+
+/* EMPTY */
+
+QPushButton[dayType="empty"] {
+    background: transparent;
+    border: none;
+}
+
+/* NORMAL — neutral gray */
+
+QPushButton[dayType="normal"] {
+    background: #3a3f4d;
+    border: 1px solid #6b7287;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+QPushButton[dayType="normal"]:hover {
+    background: #4a5062;
+}
+
+/* WORKOUT — strong blue */
+
+QPushButton[dayType="workout"] {
+    background: #1f3f99;
+    border: 1px solid #4f7dff;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+QPushButton[dayType="workout"]:hover {
+    background: #2a5cff;
+}
+
+/* REST — warm desaturated amber */
+
+QPushButton[dayType="rest"] {
+    background: #5a4634;      /* warm brown */
+    border: 1px solid #c59b63;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+QPushButton[dayType="rest"]:hover {
+    background: #705640;
+}
+
+/* TODAY — dominant neon */
+
+QPushButton[currentDay="true"] {
+    background: #00e5ff;
+    color: #000000;
+    border: 2px solid #00ffff;
+    font-weight: 800;
+}
+
+
+/* ---------------------------------------------------
+   TRASH ICON BUTTON
+--------------------------------------------------- */
+
+QPushButton#trash {
+    background: transparent;
+    border: none;
+    padding: 2px;
+    border-radius: 6px;
+}
+
+QPushButton#trash:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+QPushButton#trash:pressed {
+    background: rgba(255, 255, 255, 0.12);
 }
