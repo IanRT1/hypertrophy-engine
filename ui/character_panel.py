@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 from domain import EXERCISE_CATALOG
 from ui.dialogs.profile_dialog import ProfileDialog
+from ui.dialogs.strength_calibration_dialog import StrengthCalibrationDialog
 from ui.widgets.rounded_progress_bar import RoundedProgressBar
 
 
@@ -63,13 +64,16 @@ class CharacterPanel(QGroupBox):
         self.lbl_level.setObjectName("MetricLabel")
 
         self.btn_edit_profile = QPushButton("Edit Profile")
+        self.btn_calibrate_strength = QPushButton("Calibrate Strength")
 
         self.root_layout.addWidget(self.lbl_bodyweight)
         self.root_layout.addWidget(self.lbl_level)
         self.root_layout.addWidget(self.btn_edit_profile)
+        self.root_layout.addWidget(self.btn_calibrate_strength)
         self.root_layout.addSpacing(12)
 
         self.btn_edit_profile.clicked.connect(self.open_profile_dialog)
+        self.btn_calibrate_strength.clicked.connect(self.open_strength_calibration)
 
         # ==========================================================
         # MUSCLE DEVELOPMENT
@@ -165,6 +169,25 @@ class CharacterPanel(QGroupBox):
                     if self.parent_window:
                         self.parent_window.on_profile_updated()
 
+    def open_strength_calibration(self):
+        selected = None
+        if self.parent_window:
+            selected = self.parent_window.exercise.exercise_dropdown.currentText()
+        dialog = StrengthCalibrationDialog(self.session.profile, selected, self)
+        if not dialog.exec():
+            return
+        exercise, load, reps = dialog.get_values()
+        reply = QMessageBox.question(
+            self,
+            "Reset Required",
+            "Saving this strength calibration will reset all progress. Continue?",
+            QMessageBox.Yes | QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.session.update_strength_baseline(exercise, load, reps)
+            if self.parent_window:
+                self.parent_window.on_profile_updated()
+
     # ------------------------------------------------------------------
     # Refresh UI
     # ------------------------------------------------------------------
@@ -255,17 +278,16 @@ class CharacterPanel(QGroupBox):
         hypertrophy_component = engine.hypertrophy_1rm_contribution(exercise_name)
         neural_component = current_1rm - hypertrophy_component
 
-        ceiling = profile.bodyweight * 1.8
-        weighted_ceiling = sum(
-            ceiling * ratio
-            for _, ratio in ex_profile.strength_contribution.items()
-        )
+        weighted_ceiling = engine.exercise_1rm_ceiling(exercise_name)
 
         distance_to_ceiling = weighted_ceiling - current_1rm
 
+        estimate_kind = (
+            "calibrated" if engine.has_calibrated_1rm(exercise_name) else "estimated fallback"
+        )
         self.lbl_stats.setText(
             f"{exercise_name} Stats:\n"
-            f"  • 1RM: {current_1rm:.1f} kg\n"
+            f"  • 1RM: {current_1rm:.1f} kg ({estimate_kind})\n"
             f"  • Hypertrophy: {hypertrophy_component:.1f} kg\n"
             f"  • Neural: {neural_component:.1f} kg\n"
             f"  • Ceiling: {weighted_ceiling:.0f} kg\n"

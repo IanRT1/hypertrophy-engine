@@ -1,6 +1,6 @@
 """Broad literature-informed targets used by calibration diagnostics."""
 
-# Approximate repetitions to momentary failure for typical dynamic resistance exercises.
+# Evidence: REPS-001, REPS-002. Approximate repetitions to momentary failure.
 # Bands deliberately accommodate inter-individual and exercise-specific variation.
 GENERAL_REP_BANDS = {
     0.50: (20, 40),
@@ -13,7 +13,7 @@ GENERAL_REP_BANDS = {
     0.95: (1, 4),
 }
 
-# Multi-joint lower-body exercises commonly permit more repetitions at the same relative load.
+# Evidence: REPS-001 (inferred coefficient, not directly validated).
 LOWER_BODY_REP_BANDS = {
     fraction: (lower, round(upper * 1.35))
     for fraction, (lower, upper) in GENERAL_REP_BANDS.items()

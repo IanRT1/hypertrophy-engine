@@ -15,3 +15,6 @@ python -m ruff check .
 
 Launch from a source checkout with `python main.py`. After installation, the
 `hypertrophy-engine` command launches the application from any working directory.
+
+Model assumptions and supporting research are tracked in `docs/evidence.md`; calibration
+sources and reproducible diagnostics live under `calibration/`.

@@ -8,6 +8,7 @@ import ui.character_panel as character_panel_module
 from domain import EXERCISE_CATALOG
 from domain.athlete_profile import AthleteProfile
 from ui.dialogs.profile_dialog import ProfileDialog
+from ui.dialogs.strength_calibration_dialog import StrengthCalibrationDialog
 from ui.main_window import HypertrophyMainWindow
 
 
@@ -248,3 +249,48 @@ def test_profile_dialog_buttons_set_result(qtbot, label, expected):
     buttons = {button.text(): button for button in dialog.findChildren(QPushButton)}
     click(qtbot, buttons[label])
     assert dialog.result() == expected
+
+
+def test_strength_calibration_dialog_estimates_1rm(qtbot):
+    dialog = StrengthCalibrationDialog(AthleteProfile(), "Chest Press")
+    qtbot.addWidget(dialog)
+    dialog.load.setValue(60)
+    dialog.reps.setValue(8)
+    assert dialog.get_values() == ("Chest Press", 60.0, 8)
+    assert "74.5 kg" in dialog.estimate.text()
+
+
+def strength_dialog_stub(exercise="Chest Press", load=60.0, reps=8):
+    class AcceptedStrengthDialog:
+        def __init__(self, profile, selected_exercise, parent):
+            pass
+
+        def exec(self):
+            return True
+
+        def get_values(self):
+            return exercise, load, reps
+
+    return AcceptedStrengthDialog
+
+
+def test_strength_calibration_updates_engine_and_resets(window, monkeypatch):
+    window.session.engine.day_index = 4
+    monkeypatch.setattr(
+        character_panel_module, "StrengthCalibrationDialog", strength_dialog_stub()
+    )
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.Yes)
+    window.character.open_strength_calibration()
+    assert window.session.engine.day_index == 0
+    assert window.session.engine.current_1rm("Chest Press") == pytest.approx(60 * 36 / 29)
+    assert "calibrated" in window.character.lbl_stats.text()
+
+
+def test_strength_calibration_decline_preserves_session(window, monkeypatch):
+    original_profile = window.session.profile
+    monkeypatch.setattr(
+        character_panel_module, "StrengthCalibrationDialog", strength_dialog_stub()
+    )
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.No)
+    window.character.open_strength_calibration()
+    assert window.session.profile is original_profile

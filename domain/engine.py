@@ -44,6 +44,7 @@ class Engine:
         self.rng = random.Random(seed)
 
         self.muscles: dict[str, MuscleState] = self._initialize_muscles()
+        self._baseline_scales = self._initialize_baseline_scales()
 
         self.day_index: int = 0
         self.daily_readiness: float = 1.0
@@ -141,6 +142,10 @@ class Engine:
         Calculate the 1RM for a given exercise based on the current strength
         of all muscles involved in the lift.
         """
+        self._exercise_profile(exercise_name)
+        return self._modeled_1rm(exercise_name) * self._baseline_scales.get(exercise_name, 1.0)
+
+    def _modeled_1rm(self, exercise_name: str) -> float:
         profile = self._exercise_profile(exercise_name)
 
         total = 0.0
@@ -149,6 +154,25 @@ class Engine:
             total += muscle.strength * ratio
 
         return total
+
+    def _initialize_baseline_scales(self) -> dict[str, float]:
+        scales = {}
+        for baseline in self.profile.performance_baselines:
+            inferred = self._modeled_1rm(baseline.exercise)
+            scales[baseline.exercise] = baseline.estimated_1rm / inferred
+        return scales
+
+    def has_calibrated_1rm(self, exercise_name: str) -> bool:
+        self._exercise_profile(exercise_name)
+        return exercise_name in self._baseline_scales
+
+    def exercise_1rm_ceiling(self, exercise_name: str) -> float:
+        profile = self._exercise_profile(exercise_name)
+        muscle_ceiling = self.profile.bodyweight * 1.8
+        modeled_ceiling = sum(
+            muscle_ceiling * ratio for ratio in profile.strength_contribution.values()
+        )
+        return modeled_ceiling * self._baseline_scales.get(exercise_name, 1.0)
 
     def hypertrophy_1rm_contribution(self, exercise_name: str) -> float:
         """
@@ -167,7 +191,7 @@ class Engine:
 
             total += hypertrophy_component * ratio
 
-        return total
+        return total * self._baseline_scales.get(exercise_name, 1.0)
 
 
 
@@ -213,7 +237,7 @@ class Engine:
         # Scale reps and exponent for lower-body lifts
         reps_scale = self.cfg.reps_scale
         exponent = self.cfg.reps_curve_exponent
-        if is_lower_body:
+        if is_lower_body:  # Evidence: REPS-001; exact modifiers remain inferred.
             reps_scale *= 1.1       # +10% reps for leg-dominant lifts
             exponent *= 0.85        # slightly more forgiving exponent
 
@@ -389,6 +413,7 @@ class Engine:
             raise ValueError("rest_seconds must be a finite number >= 0")
         rest = float(rest)
 
+        # Evidence: REST-001, REST-002; decay shape and coefficient remain inferred.
         recovery_factor = math.exp(
             -self.cfg.transient_decay_k_per_sec * rest
         )

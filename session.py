@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from numbers import Real
 
 from domain import EXERCISE_CATALOG, DayResult, Engine, ExerciseResult, SetPlan
-from domain.athlete_profile import AthleteProfile
+from domain.athlete_profile import AthleteProfile, PerformanceBaseline
 
 # =========================================================
 # ROUTINE DATA CONTAINER
@@ -222,7 +222,23 @@ class TrainingSession:
     # ---------------------------------------------------------
 
     def update_profile(self, bodyweight: float, level: str):
-        self.profile = AthleteProfile(bodyweight=bodyweight, training_level=level)
+        self.profile = AthleteProfile(
+            bodyweight=bodyweight,
+            training_level=level,
+            performance_baselines=self.profile.performance_baselines,
+        )
+        self.reset_all()
+
+    def update_strength_baseline(self, exercise: str, load: float, reps: int) -> None:
+        baseline = PerformanceBaseline(exercise, load, reps)
+        retained = tuple(
+            item for item in self.profile.performance_baselines if item.exercise != exercise
+        )
+        self.profile = AthleteProfile(
+            bodyweight=self.profile.bodyweight,
+            training_level=self.profile.training_level,
+            performance_baselines=retained + (baseline,),
+        )
         self.reset_all()
 
     # ---------------------------------------------------------

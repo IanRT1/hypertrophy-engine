@@ -2,9 +2,9 @@
 
 ## Verdict
 
-The engine's short-term behavior is directionally credible, but its absolute strength and
-year-long progression are not yet realistic enough to treat as predictions. The reports are
-best used as regression diagnostics while those parts of the model are redesigned.
+The engine's short-term behavior is directionally credible. Exercise-specific baselines now
+make initial strength personal when supplied, but fallback strength and year-long progression
+are not realistic enough to treat as predictions. The reports remain regression diagnostics.
 
 ## Findings
 
@@ -12,10 +12,10 @@ best used as regression diagnostics while those parts of the model are redesigne
    above `1.0`; fractional exponentiation then produced a complex number and crashed the next
    training day. Progress is now clamped to `[0, 1]`, with a regression test covering the
    ceiling and a deterministic 52-week test covering the original failure path.
-2. **High — starting strength is undercalibrated.** For a 90 kg athlete, advanced Chest Press
-   starts at 32.58 kg (`0.362x` bodyweight). That is not a defensible bench-like strength
-   baseline. Machine loads also differ by equipment, so a universal exercise-load standard
-   would create false precision.
+2. **Mitigated — fallback strength is undercalibrated.** For a 90 kg athlete, advanced Chest
+   Press falls back to 32.58 kg (`0.362x` bodyweight). Users can now replace that guess per
+   exercise with a recent 1–10RM set. Machine loads differ, so calibration is intentionally
+   exercise-specific; uncalibrated values are visibly labeled as fallbacks.
 3. **High — progression reaches the model ceiling too quickly.** The intermediate Chest Press
    scenario reaches progress `1.0` within 52 weeks on three weekly sessions. The meaning of
    that ceiling and its time scale need to be explicitly defined before growth coefficients
@@ -31,8 +31,6 @@ best used as regression diagnostics while those parts of the model are redesigne
 
 ## Recommended Next Change
 
-Replace inferred absolute starting loads with user-entered baseline performance (an estimated
-1RM or recent load/repetitions for each exercise), retaining the current bodyweight/experience
-calculation only as a clearly labeled fallback. Then define what `progress = 1` represents and
-calibrate multi-month adaptation against longitudinal resistance-training data. Do not tighten
-the broad repetition bands until exercise-specific datasets justify narrower limits.
+Define what `progress = 1` represents and calibrate multi-month adaptation against longitudinal
+resistance-training data. Do not tighten the broad repetition bands until exercise-specific
+datasets justify narrower limits.
