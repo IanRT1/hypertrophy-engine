@@ -130,6 +130,19 @@ def test_peak_progress_tracks_new_high(beginner_engine):
     assert chest.peak_progress == chest.progress
 
 
+def test_progress_saturates_at_physiological_ceiling(beginner_engine):
+    chest = beginner_engine.muscles["Chest"]
+    chest.progress = 0.999
+    chest.peak_progress = 0.999
+    chest.day_stimulus = 100
+    beginner_engine.end_day()
+    assert 0.999 <= chest.progress <= 1.0
+
+    chest.day_stimulus = 100
+    beginner_engine.end_day()
+    assert chest.progress == 1.0
+
+
 def test_rest_day_advances_requested_number_of_days(beginner_engine):
     beginner_engine.rest_day(3)
     assert beginner_engine.day_index == 3

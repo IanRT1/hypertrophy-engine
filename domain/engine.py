@@ -566,7 +566,7 @@ class Engine:
                 * muscle.fatigue_systemic
             )
 
-            distance = (1.0 - muscle.progress) ** 0.3
+            distance = max(0.0, 1.0 - muscle.progress) ** 0.3
 
             base_growth = (
                 self.cfg.adaptation_rate
@@ -591,7 +591,7 @@ class Engine:
             hypertrophy_growth = base_growth * regain_factor
             hypertrophy_growth = self._clamp(hypertrophy_growth, 0.0, 1.0)
 
-            muscle.progress += hypertrophy_growth
+            muscle.progress = self._clamp(muscle.progress + hypertrophy_growth, 0.0, 1.0)
 
             if muscle.progress > muscle.peak_progress:
                 muscle.peak_progress = muscle.progress
